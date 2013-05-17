@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+
+
+{% from 'bits.html' import breadcrumb_items %}
+{% block breadcrumb %}
+  {{ breadcrumb_items([
+    (url_for('parcel.index'), 'GIO Land'),
+  ]) }}
+{% endblock %}
+
+
+{% block page_heading %}
+  <h1>High Resolution Layers</h1>
+{% endblock %}
+
+
+{% block content %}
+
+  <h2>EEA Member countries</h2>
+
+  <div class="countrybox-container">
+    {% for key, label in COUNTRIES_MC %}
+
+    <div class="countrybox">
+      <a href="{{ url_for('parcel.country', code=key) }}">{{ label }}</a>
+    </div>
+
+    {% endfor %}
+  </div>
+
+  <h2>Cooperating countries</h2>
+
+  <div class="countrybox-container">
+    {% for key, label in COUNTRIES_CC %}
+
+    <div class="countrybox">
+      <a href="{{ url_for('parcel.country', code=key) }}">{{ label }}</a>
+    </div>
+
+    {% endfor %}
+  </div>
+
+{% endblock %}

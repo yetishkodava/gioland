@@ -1,0 +1,37 @@
+<div class="localnav">
+
+ <h2>Local navigation</h2>
+
+  <ul>
+
+    <li>
+      <a href="{{ url_for('parcel.index') }}">GIO Land</a>
+    </li>
+
+    <li>
+      <a href="{{ url_for('parcel.search') }}">Search deliveries</a>
+    </li>
+
+    <li>
+      <a href="{{ url_for('parcel.subscribe') }}">Subscribe to notifications</a>
+    </li>
+
+    {% if authorize(['ROLE_ADMIN']) %}
+    <li>
+      <a href="{{ url_for('auth.roles_debug') }}">Roles</a>
+    </li>
+    {% endif %}
+
+    {% if authorize_for_parcel(None) %}
+    <li>
+      <a href="{{ url_for('parcel.new') }}">New delivery</a>
+    </li>
+    {% endif %}
+
+    <li>
+      <a href="http://gaur.eea.europa.eu/gioland/docs/">Documentation</a>
+    </li>
+
+  </ul>
+
+</div>

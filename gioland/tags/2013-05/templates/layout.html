@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>{% block page_title %}GIO Land{% endblock %}</title>
+
+    {% include "eionet/headstyles.html" %}
+    <link rel="stylesheet" media="screen"
+          href="{{ url_for('static', filename='style.css') }}" />
+    <script src="{{ url_for('static', filename='jquery.js') }}"></script>
+    <script> var App = {} </script>
+    {% block scripts %}{% endblock %}
+  </head>
+
+  <body>
+
+    <div id="container">
+      <div id="toolribbon">
+        <div id="lefttools">
+          <a id="skiplink" accesskey="2"
+             href="#workarea"><span>Skip to content</span></a>
+          <a id="eealink" href="http://www.eea.europa.eu/">EEA</a>
+          <a id="ewlink" href="http://ew.eea.europa.eu/">EnviroWindows</a>
+        </div>
+        <div id="righttools">
+          {% if g.username %}
+            <a href="{{ url_for('auth.login') }}"
+               >{{ ldap_full_name(g.username) }}</a>
+          {% else %}
+            <a href="{{ url_for('auth.login') }}">login</a>
+          {% endif %}
+        </div>
+      </div>
+      <div id="pagehead">
+        <a title="Frontpage" href="/"><img
+          src="{{ url_for('static', filename='eionet2007/eea-print-logo.gif') }}"
+          alt="Logo" id="logo" width="428" height="87" /></a>
+        <div id="networktitle">Eionet</div>
+        <div id="sitetitle">GIO Land &mdash; High Resolution Layers</div>
+      </div>
+
+      {% include "eionet/menuribbon.html" %}
+
+      {% block breadcrumb %}{% endblock %}
+
+      <div id="leftcolumn">
+       {% include "eionet/localnav.html" %}
+      </div>
+
+      <div id="workarea">
+        {% block page_heading %}{% endblock %}
+        {% include "eionet/flash_messages.html" %}
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+
+    <div id="pagefoot">
+      <p></p>
+    </div>
+
+  </body>
+</html>

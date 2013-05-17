@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+
+{% block page_heading %}
+  <h1>High Resolution Layers &ndash; login</h1>
+{% endblock %}
+
+{% block content %}
+
+  {% if g.username %}
+
+    <p>
+      You are logged in as
+      <strong>{{ full_name }}</strong> ({{ user_id }}).
+    </p>
+
+    <form method="post">
+      <input type="hidden" name="action" value="logout">
+      <button type="submit">Log out</button>
+    </form>
+
+  {% else %}
+
+    <form method="post">
+      <label>Username: <input name="username"></label><br>
+      <label>Password: <input name="password" type="password"></label><br>
+      <input type="hidden" name="action" value="login">
+      <input type="hidden" name="next" value="{{ next }}">
+      <button type="submit">Log in</button>
+    </form>
+
+  {% endif %}
+
+  {% if request.args.get('debug') == 'on' %}
+    <p>
+      Roles:
+      {% for role in ['ROLE_SP', 'ROLE_ETC', 'ROLE_NRC', 'ROLE_ADMIN'] %}
+        {% if authorize([role]) %}<tt>{{ role }}</tt>{% endif %}
+      {% endfor %}
+    </p>
+    {% if authorize(['ROLE_ADMIN']) %}
+      <form action="{{ url_for('auth.impersonate') }}" method="post">
+        <input name="user_id">
+        <button type="submit">impersonate</button>
+      </form>
+    {% endif %}
+  {% endif %}
+
+{% endblock %}

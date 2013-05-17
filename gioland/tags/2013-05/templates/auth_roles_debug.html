@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+
+{% block page_heading %}
+  <h1>High Resolution Layers &ndash; role assignments</h1>
+{% endblock %}
+
+{% block content %}
+
+  <h2>Role assignments</h2>
+
+  <dl>
+  {% for name in ALL_ROLES %}
+
+    <dt>{{ name }}</dl>
+
+    {% for principal in config.get(name, []) %}
+      <dd><tt>
+        {%- if principal.startswith('ldap_group:') -%}
+          {%- set group_name = principal['ldap_group:'|length:] -%}
+          {%- set group_url = "http://eionet.europa.eu/ldap-roles/?role_id=" +
+                              group_name %}
+          <a href="{{ group_url }}">{{ principal }}</a>
+        {%- elif principal.startswith('user_id:') -%}
+          {%- set user_id = principal['user_id:'|length:] -%}
+          {%- set user_url = "http://www.eionet.europa.eu/eionet_account_tools"
+                             "/users/edit_user?id=" + user_id %}
+          <a href="{{ user_url }}">{{ principal }}</a>
+        {%- else -%}
+          {{ principal }}
+        {%- endif -%}
+      </tt></dd>
+    {% else %}
+      <dd><em>(nobody assigned)</em></dd>
+    {% endfor %}
+
+  {% endfor %}
+  </dl>
+
+
+  <h2>Roles allowed on parcel stage</h2>
+
+  <dl>
+  {% for stage in STAGES.values() %}
+
+    <dt>{{ stage['label'] }}</dl>
+
+    {% for role in stage['roles'] %}
+      <dd><tt>{{ role }}</tt></dd>
+    {% else %}
+      <dd><em>(nobody assigned)</em></dd>
+    {% endfor %}
+
+  {% endfor %}
+  </dl>
+
+{% endblock %}
