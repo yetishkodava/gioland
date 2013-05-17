@@ -1,0 +1,77 @@
+{% extends "layout.html" %}
+
+
+{% from 'bits.html' import breadcrumb_items %}
+{% block breadcrumb %}
+  {{ breadcrumb_items([
+    (url_for('parcel.index'), 'GIO Land'),
+    (url_for('parcel.subscribe'),
+             "High Resolution Layers - notifications via UNS"),
+  ]) }}
+{% endblock %}
+
+
+{% block page_heading %}
+  <h1>High Resolution Layers &ndash; notifications via UNS</h1>
+{% endblock %}
+
+
+{% macro subscribe_form() %}
+
+  {% from 'bits.html' import pick_from_list %}
+
+  <form method="post">
+
+    <table>
+    {% for field in UNS_FIELD_DEFS %}
+      {% set name = field['name'] %}
+      {% set label = field['label'] %}
+      {% set items = field['range'] %}
+
+      <tr>
+        {% set field_id = 'subscribe-meta-' + field['name'] %}
+        <td><label for="{{ field_id }}">{{ field['label'] }}</label></td>
+        <td>{{ pick_from_list(field_id, field['name'],
+                              field['range'], any=True) }}</td>
+      </tr>
+
+    {% endfor %}
+
+      <tr>
+        {% set field_id = 'subscribe-decision' %}
+        {% set range = [('accepted', 'Accepted'),
+                        ('rejected', 'Rejected')] %}
+        <td><label for="{{ field_id }}">Decision</label></td>
+        <td>{{ pick_from_list(field_id, 'decision', range, any=True) }}</td>
+      </tr>
+
+    </table>
+
+    <button type="submit">Subscribe</button>
+
+  </form>
+
+  <p>
+    You can modify and cancel subscriptions from the
+    <a href="http://uns.eionet.europa.eu/subscriptions/subscriptions.jsf"
+      {#-#}>UNS configuration page</a>.
+  </p>
+
+{% endmacro %}
+
+
+{% block content %}
+  {% if not g.username %}
+    <p>
+      {% set url = url_for('auth.login') %}
+      Please <a href="{{ url }}">log in</a> to subscribe for notifications.
+    </p>
+  {% elif can_subscribe_to_notifications(g.username) %}
+    {{ subscribe_form() }}
+  {% else %}
+    <p>
+      User <tt>{{ g.username or "(anonymous)" }}</tt> is not allowed to
+      subscribe.
+    </p>
+  {% endif %}
+{% endblock %}

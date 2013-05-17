@@ -1,0 +1,214 @@
+{% macro metadata_table(metadata, show_stage=True) %}
+
+  <table class="datatable">
+
+    <tr>
+      <th>Country</th>
+      <td>{{ COUNTRY_MAP[metadata['country']] }}</td>
+    </tr>
+
+    <tr>
+      <th>Theme</th>
+      <td>{{ THEME_MAP[metadata['theme']] }}</td>
+    </tr>
+
+    <tr>
+      <th>Projection</th>
+      <td>{{ PROJECTION_MAP[metadata['projection']] }}</td>
+    </tr>
+
+    <tr>
+      <th>Spatial resolution</th>
+      <td>{{ RESOLUTION_MAP[metadata['resolution']] }}</td>
+    </tr>
+
+    <tr>
+      <th>Extent</th>
+      <td>
+        {{ EXTENT_MAP[metadata['extent']] }} <br>
+        <span style="font-size: 12px">{{ metadata['coverage'] }}</span>
+      </td>
+    </tr>
+
+    {% if show_stage %}
+    <tr>
+      <th>Processing stage</th>
+      <td>{{ STAGE_MAP[metadata['stage']] }}</td>
+    </tr>
+    {% endif %}
+
+  </table>
+
+{% endmacro %}
+
+
+{% macro files_table(parcel, delete_buttons=False) %}
+
+  {% set files = parcel.get_files() %}
+
+  {% if files %}
+    <div class="files-table">
+    <ul>
+    {% for file_path in files %}
+      <li>
+      {% if parcel %}
+        {% set url = url_for('parcel.download',
+                             name=parcel.name, filename=file_path.name) %}
+        <a href="{{ url }}">{{ file_path.name }}</a>
+      {% else %}
+        {{ file_path.name }}
+      {% endif %}
+      ({{ file_path.getsize() }} bytes)
+      {% if delete_buttons %}
+        <a href="{{ url_for('parcel.delete_file', name=parcel.name,
+                            filename=file_path.name ) }}"
+           class="delete-file">Delete</a>
+      {% endif %}
+      </li>
+    {% endfor %}
+    </ul>
+    </div>
+  {% else %}
+
+    <p><i>No files uploaded.</i></p>
+
+  {% endif %}
+
+{% endmacro %}
+
+
+{% macro pick_from_list(id, name, items, any=False) -%}
+  <select id="{{ id }}" name="{{ name }}">
+  {% if any %}
+    <option value="">Any {{ name|title }}</option>
+  {% endif %}
+  {% for key, label in items %}
+    <option value="{{ key }}">{{ label }}</option>
+  {% endfor %}
+  </select>
+{%- endmacro %}
+
+{% macro breadcrumb_items(crumb_list) -%}
+  <div class="breadcrumbtrail">
+
+    <div class="breadcrumbhead">You are here:</div>
+
+    <div class="breadcrumbitem eionetaccronym">
+      <a href="http://www.eionet.europa.eu/">Eionet</a>
+    </div>
+
+    {% for crumb_url, crumb_name in crumb_list %}
+      {% if loop.last -%}
+        {% set css_class = 'breadcrumbitemlast' %}
+      {% else %}
+        {% set css_class = 'breadcrumbitem' %}
+      {%- endif %}
+      <div class="{{ css_class }}">
+        {% if crumb_url %}
+          <a href="{{ crumb_url }}">{{ crumb_name }}</a>
+        {% else %}
+          {{ crumb_name }}
+        {% endif %}
+      </div>
+    {% endfor %}
+    <div class="breadcrumbtail"></div>
+  </div>
+{% endmacro %}
+
+
+{% macro parcel_status(parcel) %}
+
+  <a href="{{ url_for('parcel.view', name=parcel.name) }}">
+  {% if parcel.uploading %}
+
+    {% if STAGES[parcel.metadata['stage']]['last'] %}
+      <em>done</em>
+    {% else %}
+      <em>in progress</em>
+    {% endif %}
+
+  {% else %}
+
+    {% if parcel.metadata['rejection'] %}
+      <img src="{{ url_for('static', filename='rejected.gif') }}"
+           width="16" height="16" alt="Rejected">
+    {% else %}
+      <img src="{{ url_for('static', filename='ok.gif') }}"
+           width="16" height="16" alt="Finalized">
+    {% endif %}
+
+  {% endif %}
+  </a>
+
+{% endmacro %}
+
+
+{% macro workflow_overview(parcels) %}
+
+  {% for grouper, parcels in grouped_parcels %}
+
+  <table class="datatable" style="width: 100%;">
+    <colgroup style="width: 11em;"></colgroup>
+    <thead>
+      <tr>
+        <th class="title" colspan="9">
+          {{ COUNTRY_MAP[grouper.country] }} /
+          {{ PROJECTION_MAP[grouper.projection] }} /
+          {{ RESOLUTION_MAP[grouper.resolution] }} /
+          {{ EXTENT_MAP[grouper.extent] }}
+        </th>
+      </tr>
+      <tr>
+        <th>HRL</th>
+        <th>Intermediate</th>
+        <th>Semantic Check</th>
+        <th>Verification</th>
+        <th>Verification Check</th>
+        <th>Enhacement</th>
+        <th>Enhacement Check</th>
+        <th>Final Integrated</th>
+        <th>Final Validated</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for parcel in parcels %}
+
+      <tr>
+        <th class="scope-row" scope="row">
+          {{ THEME_MAP[parcel.metadata['theme']] }}
+          {% if parcel.metadata['extent'] == 'partial' %}
+            ({{ parcel.metadata['coverage'] }})
+          {% endif %}
+        </th>
+
+        {% set parcels_by_stage = get_parcels_by_stage(parcel.name) %}
+
+        {% for stage in STAGES %}
+
+        {% set parcel_by_stage = parcels_by_stage[stage] %}
+
+        <td class="center">
+          {% if parcel_by_stage %}
+
+            {{ parcel_status(parcel_by_stage) }}
+
+          {% endif %}
+
+        </td>
+
+        {% endfor %}
+
+      </tr>
+
+      {% endfor %}
+
+    </tbody>
+
+  </table>
+
+  {% endfor %}
+
+{% endmacro %}
+
+
