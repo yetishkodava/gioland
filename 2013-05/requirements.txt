@@ -17,7 +17,7 @@ blinker==1.2
 python-dateutil==2.1
 six==1.2.0
 eea.usersdb==1.1.0
-colander==0.9.9
+colander==1.7.0
 translationstring==1.1
 raven==2.0.10
 simplejson==2.6.2
